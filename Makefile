@@ -1,8 +1,14 @@
 build:
 	@go build -o bin/customers-management
 
+# run: build
+# 	@./bin/customers-management
+
 run: build
-	@./bin/customers-management
+	@CompileDaemon -command="./customers-management"
+
+migrate:
+	@go run migrate/migrate.go
 
 test: 
 	@go test -v ./...
