@@ -1,5 +1,5 @@
 build:
-	@go build -o bin/customers-management
+	@go build -o customers-management
 
 # run: build
 # 	@./bin/customers-management
