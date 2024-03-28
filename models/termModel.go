@@ -7,5 +7,5 @@ import (
 type Term struct {
 	gorm.Model
 	Text string
-	Version string
+	Version int
 }
