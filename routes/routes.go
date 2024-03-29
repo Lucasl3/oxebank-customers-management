@@ -10,17 +10,7 @@ func SetupRoutes(r *gin.Engine) {
 	SetupCardRoutes(r)
 	SetupTermRoutes(r)
 	SetupBlockRoutes(r)
-}
-
-func SetupUserRoutes(r *gin.Engine) {
-	userGroup := r.Group("/users")
-	{
-		userGroup.GET("/", controllers.UsersIndex)
-		userGroup.GET("/:id", controllers.UsersShow)
-		userGroup.POST("/", controllers.UsersCreate)
-		userGroup.PUT("/:id", controllers.UsersUpdate)
-		userGroup.DELETE("/:id", controllers.UsersDelete)
-	}
+	SetupRegisterRoutes(r)
 }
 
 func SetupCardRoutes(r *gin.Engine) {
@@ -40,7 +30,16 @@ func SetupTermRoutes(r *gin.Engine) {
 		termGroup.GET("/", controllers.TermsIndex)
 		termGroup.GET("/:version", controllers.TermsShow)
 		termGroup.POST("/", controllers.TermsCreate)
-		termGroup.POST("/accept", controllers.TermsAccept)
+	}
+}
+
+func SetupUserRoutes(r *gin.Engine) {
+	userGroup := r.Group("/users")
+	{
+		userGroup.GET("/", controllers.UsersIndex)
+		userGroup.GET("/:id", controllers.UsersShow)
+		userGroup.PUT("/:id", controllers.UsersUpdate)
+		userGroup.DELETE("/:id", controllers.UsersDelete)
 	}
 }
 
@@ -49,5 +48,14 @@ func SetupBlockRoutes(r *gin.Engine) {
 	{
 		blockGroup.PUT("/card/:id", controllers.CardsBlock)
 		blockGroup.PUT("/user/:id", controllers.UsersBlock)
+	}
+}
+
+func SetupRegisterRoutes(r *gin.Engine) {
+	registerGroup := r.Group("/register")
+	{
+		registerGroup.POST("/", controllers.UsersCreate)
+		registerGroup.GET("/get-terms", controllers.TermsLatest)
+		registerGroup.POST("/accept-terms", controllers.TermsAccept)
 	}
 }

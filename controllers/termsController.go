@@ -4,14 +4,14 @@ import (
 	"customers-management/initializers"
 	"customers-management/models"
 	"net/http"
-
+	"gorm.io/gorm"
 	"github.com/gin-gonic/gin"
+	"errors"
 )
 
 func TermsCreate(c *gin.Context) {
 	var body struct {
 		Text string `json:"text" binding:"required"`
-		Version string `json:"version" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -19,14 +19,28 @@ func TermsCreate(c *gin.Context) {
 		return
 	}
 
+	var lastTerm models.Term
+	if err := initializers.DB.Order("version DESC").First(&lastTerm).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching the latest version"})
+			return
+		}
+	}
+
+	newVersion := 1
+	if lastTerm.Version != 0 {
+		newVersion = lastTerm.Version + 1
+	}
+
 	term := models.Term{
 		Text: body.Text,
-		Version: body.Version,
+		Version: newVersion,
 	}
+
 	result := initializers.DB.Create(&term)
 
 	if result.Error != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
 		return
 	}
 
@@ -58,10 +72,22 @@ func TermsShow(c *gin.Context) {
 	})
 }
 
+func TermsLatest(c *gin.Context) {
+	var term models.Term
+	if err := initializers.DB.Order("version DESC").First(&term).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No terms found"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"data": term,
+	})
+}
+
 func TermsAccept(c *gin.Context) {
 	var body struct {
 		UserID uint `json:"user_id" binding:"required"`
-		Version string `json:"version" binding:"required"`
+		Version int `json:"version" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
